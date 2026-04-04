@@ -43,7 +43,7 @@ If you don't want any proprietary AI company processing your documents, use an o
 
 ```bash
 export LEXWIKI_API_KEY=sk-or-v1-your-key-here
-export LEXWIKI_MODEL=deepseek/deepseek-r1
+export LEXWIKI_MODEL=stepfun/step-3.5-flash
 export LEXWIKI_VAULT=~/my-legal-library/vault
 ```
 
