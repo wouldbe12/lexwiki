@@ -19,15 +19,12 @@
   "documentation": "https://github.com/wouldbe12/lexwiki#readme",
   "keywords": ["legal", "knowledge-base", "obsidian", "wiki", "contracts", "law"],
   "server": {
-    "type": "uv",
+    "type": "python",
     "entry_point": "src/lexwiki/mcp_server/server.py",
     "mcp_config": {
-      "command": "uv",
+      "command": "uvx",
       "args": [
-        "run",
-        "--with", "lexwiki",
-        "python", "-c",
-        "from lexwiki.mcp_server.server import serve; serve()"
+        "lexwiki", "serve-mcp"
       ],
       "env": {
         "LEXWIKI_API_KEY": "${user_config.api_key}",
