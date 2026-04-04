@@ -1,8 +1,6 @@
 # LexWiki
 
-**LLM-powered legal knowledge base compiler.** Ingest legal documents, compile a structured Obsidian wiki, query with natural language, lint for consistency. No vector database required.
-
-Inspired by [Karpathy's LLM Knowledge Bases](https://x.com/karpathy/status/2039805659525644595) pattern, built for legal.
+**Constantly-updated memory for your legal documents.** Ingest contracts, statutes, and case law. The AI compiles a structured, cross-referenced library — queryable by any agent, lintable for consistency. No vector database required.
 
 ## How It Works
 
