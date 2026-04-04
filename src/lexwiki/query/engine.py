@@ -73,8 +73,10 @@ class QueryEngine:
         if not index_content.strip():
             return "The wiki is empty. Run `lexwiki compile` first to build the knowledge base."
 
-        # Step 2: Select relevant pages
+        # Step 2: Select relevant pages (LLM picks from index, keyword search as fallback)
         selected = self._select_pages(question, index_content, scope)
+        if not selected:
+            selected = self._keyword_fallback(question)
         if not selected:
             return "No relevant pages found for this question. Try broadening your query."
 
@@ -115,6 +117,13 @@ class QueryEngine:
         except (ValueError, KeyError):
             pass
         return []
+
+    def _keyword_fallback(self, question: str) -> list[str]:
+        """BM25 keyword search as fallback when LLM page selection fails."""
+        from lexwiki.query.search import search_pages
+
+        results = search_pages(question, self.wiki_dir, top_k=10)
+        return [str(p.relative_to(self.wiki_dir)) for p, _ in results]
 
     def _load_pages(self, page_paths: list[str]) -> str:
         """Load selected wiki pages, fitting within token budget."""

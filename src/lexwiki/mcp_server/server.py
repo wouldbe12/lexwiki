@@ -175,6 +175,32 @@ def lexwiki_list_pages(category: str | None = None) -> str:
     return "\n".join(lines)
 
 
+@mcp.tool()
+def lexwiki_search(keywords: str, top_k: int = 10) -> str:
+    """Fast keyword search across wiki pages (BM25 ranking, no LLM call needed).
+
+    Use this for quick lookups when you know what terms to search for.
+    Faster and more reliable than lexwiki_query for simple searches.
+
+    Args:
+        keywords: Search terms (e.g. "termination clause", "liability cap")
+        top_k: Number of results to return (default 10)
+    """
+    from lexwiki.query.search import search_pages
+
+    cfg = _cfg()
+    results = search_pages(keywords, cfg.wiki_dir, top_k=top_k)
+
+    if not results:
+        return "No results found."
+
+    lines = []
+    for path, score in results:
+        rel = path.relative_to(cfg.wiki_dir)
+        lines.append(f"{rel} (score: {score:.2f})")
+    return "\n".join(lines)
+
+
 def serve():
     """Run the MCP server with stdio transport."""
     mcp.run(transport="stdio")

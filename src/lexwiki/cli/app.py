@@ -148,6 +148,30 @@ def query(
 
 
 @app.command()
+def search(
+    query_text: str = typer.Argument(..., help="Keywords to search for."),
+    top_k: int = typer.Option(10, "--top", "-k", help="Number of results."),
+):
+    """Keyword search across wiki pages (BM25 ranking, no LLM needed)."""
+    from lexwiki.query.search import search_pages
+
+    cfg = _load_config()
+    results = search_pages(query_text, cfg.wiki_dir, top_k=top_k)
+
+    if not results:
+        console.print("[yellow]No results found.[/yellow]")
+        raise typer.Exit(0)
+
+    table = Table(title=f"Search: {query_text}")
+    table.add_column("Page", style="cyan")
+    table.add_column("Score", justify="right")
+    for path, score in results:
+        rel = path.relative_to(cfg.wiki_dir)
+        table.add_row(str(rel), f"{score:.2f}")
+    console.print(table)
+
+
+@app.command()
 def lint(
     file: Optional[Path] = typer.Option(None, "--file", "-f", help="Lint a single wiki page."),
     severity: str = typer.Option("warning", help="Minimum severity: info, warning, error."),
