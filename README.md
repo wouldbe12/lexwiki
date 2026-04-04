@@ -37,9 +37,8 @@ If you don't want any proprietary AI company processing your documents, use an o
 2. **Add credits** — $5 is enough to process hundreds of documents
 3. **Copy your API key** from the [Keys page](https://openrouter.ai/keys) (starts with `sk-or-`)
 4. **Pick a powerful open-source model** for privacy. Good choices:
-   - `deepseek/deepseek-r1` — strong reasoning, great for legal analysis
-   - `meta-llama/llama-4-maverick` — Meta's latest, excellent at structured output
-   - `qwen/qwen3-235b-a22b` — very strong at document understanding
+   - `stepfun/step-3.5-flash` — fast, cheap, tested with LexWiki
+   - `moonshotai/kimi-k2.5` — strong reasoning, great for legal analysis
 5. **Set your environment variables:**
 
 ```bash
