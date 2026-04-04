@@ -72,6 +72,13 @@ Add to your MCP settings:
 }
 ```
 
+### Claude Desktop Skill
+
+Download `skill/Skill.md` from this repo, zip it, and install via Claude Desktop:
+1. Go to **Customize > Skills**
+2. Upload the zip file
+3. The skill teaches Claude when and how to use LexWiki tools
+
 ### pip (standalone CLI)
 
 ```bash
@@ -85,6 +92,31 @@ lexwiki compile
 lexwiki query "What are the termination provisions?"
 lexwiki lint
 ```
+
+### Where to put the MCP config
+
+| IDE | Config file location |
+|---|---|
+| **Claude Code** | Run `claude mcp add ...` or add `.mcp.json` to project root |
+| **Claude Desktop** | Settings > Extensions (for .mcpb), or `~/.config/Claude/claude_desktop_config.json` |
+| **Cursor** | `.cursor/mcp.json` in project root |
+| **Windsurf** | `~/.codeium/windsurf/mcp_config.json` |
+| **Cline** | VS Code settings > Cline MCP Servers |
+
+## Viewing in Obsidian
+
+After compiling, open the `vault/` directory as an Obsidian vault:
+
+1. Open Obsidian > **Open folder as vault**
+2. Select your `vault/` directory
+3. Enable **Graph view** (Ctrl+G) to see document relationships
+4. Click any `[[backlink]]` to navigate between documents
+5. Check `_index.md` for the master overview
+
+Recommended Obsidian plugins:
+- **Dataview** -- query your wiki with SQL-like syntax
+- **Graph Analysis** -- find clusters and connections
+- **Marp Slides** -- present wiki content as slideshows
 
 ## Environment Variables
 
