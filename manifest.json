@@ -61,6 +61,10 @@
     {
       "name": "lexwiki_list_pages",
       "description": "List all pages in the wiki, optionally filtered by category (contracts, statutes, cases, memos, topics, indexes)."
+    },
+    {
+      "name": "lexwiki_search",
+      "description": "Fast keyword search across wiki pages (BM25 ranking, no LLM call needed). Use for quick lookups before resorting to lexwiki_query."
     }
   ],
   "user_config": {

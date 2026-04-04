@@ -9,9 +9,10 @@ You have access to LexWiki tools for managing a legal knowledge base. Use them w
 
 ## Available Tools
 
+- **lexwiki_search** — Fast keyword search across all pages (no LLM call, instant, use this first for quick lookups)
+- **lexwiki_query** — Answer complex legal questions using the knowledge base (LLM-powered, returns answers with citations)
 - **lexwiki_ingest** — Add a legal document (PDF, DOCX, XLSX, PPTX, HTML, TXT) to the knowledge base
 - **lexwiki_compile** — Compile raw documents into a structured wiki with backlinks, clause libraries, and indexes
-- **lexwiki_query** — Answer legal questions using the knowledge base (returns answers with wiki page citations)
 - **lexwiki_lint** — Check for expired citations, inconsistent clauses, missing standard terms, broken links
 - **lexwiki_read_page** — Read a specific wiki page
 - **lexwiki_list_pages** — List all pages, optionally filtered by category
@@ -20,9 +21,10 @@ You have access to LexWiki tools for managing a legal knowledge base. Use them w
 
 1. When the user provides legal documents, use **lexwiki_ingest** to add them
 2. After ingesting, use **lexwiki_compile** to build the structured wiki
-3. For questions about the documents, use **lexwiki_query** with a natural language question
-4. Periodically use **lexwiki_lint** to check for consistency issues
-5. Use **lexwiki_read_page** to show the user specific wiki pages
+3. For quick lookups, use **lexwiki_search** first (free, instant, deterministic)
+4. For complex questions, use **lexwiki_query** (LLM-powered, slower but synthesizes answers)
+5. Periodically use **lexwiki_lint** to check for consistency issues
+6. Use **lexwiki_read_page** to show the user specific wiki pages
 
 ## When to Use
 
@@ -34,6 +36,8 @@ You have access to LexWiki tools for managing a legal knowledge base. Use them w
 
 ## Tips
 
+- Prefer **lexwiki_search** over **lexwiki_query** for simple lookups — it's free and instant
+- Use **lexwiki_query** when the user needs a synthesized answer across multiple documents
 - After compiling, suggest the user open the `vault/` directory in Obsidian for graph view and visual navigation
 - The **_clause_library** index is especially useful for comparing similar clauses across contracts
 - Use `--scope` with queries to narrow results (e.g. `scope="contracts"` or `scope="jurisdiction:UAE"`)
