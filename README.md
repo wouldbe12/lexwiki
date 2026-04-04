@@ -21,9 +21,24 @@ The LLM classifies documents, generates summaries, builds indexes, and maintains
 
 ## Install
 
-### Claude Desktop (one-click)
+### Claude Desktop
 
-Download `lexwiki.mcpb` from [Releases](https://github.com/wouldbe12/lexwiki/releases) and double-click to install. Claude Desktop will prompt for your API key and vault directory.
+Coming soon: one-click `.mcpb` install. For now, add manually to `~/.config/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "lexwiki": {
+      "command": "uvx",
+      "args": ["lexwiki", "serve-mcp"],
+      "env": {
+        "LEXWIKI_API_KEY": "your-api-key-here",
+        "LEXWIKI_VAULT": "/path/to/your/vault"
+      }
+    }
+  }
+}
+```
 
 ### Claude Code / Cowork
 
