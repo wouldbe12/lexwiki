@@ -18,6 +18,38 @@ When you add a new document, LexWiki reads it, figures out how it connects to ev
 
 When you ask it to review itself, it finds expired statute citations, inconsistent clause language across contracts, and missing standard terms. The library keeps itself clean.
 
+## How It Works Under the Hood
+
+Everything lives in a **vault** — a folder on your computer (e.g. `~/my-legal-library/vault/`). Inside, there are two subfolders:
+
+- `vault/raw/` — your original documents converted to readable text
+- `vault/wiki/` — the compiled library with summaries, indexes, and cross-references
+
+When you tell your agent to ingest a document, LexWiki extracts the text and saves it to `raw/`. When you tell it to compile, a separate LLM reads every document in `raw/`, classifies each one (contract, statute, memo, etc.), writes a structured summary, and links it to related documents. The result goes into `wiki/`.
+
+**Your main agent (Claude, Cursor, etc.) only reads from `wiki/`.** It never sees your raw documents. The LLM that builds the library is a separate call — and you choose which model handles it.
+
+### Setting Up a Private LLM via OpenRouter
+
+If you don't want any proprietary AI company processing your documents, use an open-source model through [OpenRouter](https://openrouter.ai):
+
+1. **Register** at [openrouter.ai](https://openrouter.ai) — it's free to sign up
+2. **Add credits** — $5 is enough to process hundreds of documents
+3. **Copy your API key** from the [Keys page](https://openrouter.ai/keys) (starts with `sk-or-`)
+4. **Pick a powerful open-source model** for privacy. Good choices:
+   - `deepseek/deepseek-r1` — strong reasoning, great for legal analysis
+   - `meta-llama/llama-4-maverick` — Meta's latest, excellent at structured output
+   - `qwen/qwen3-235b-a22b` — very strong at document understanding
+5. **Set your environment variables:**
+
+```bash
+export LEXWIKI_API_KEY=sk-or-v1-your-key-here
+export LEXWIKI_MODEL=deepseek/deepseek-r1
+export LEXWIKI_VAULT=~/my-legal-library/vault
+```
+
+With this setup, your documents are processed by an open-source model through OpenRouter's API. No data goes to Anthropic, OpenAI, or any other proprietary provider. For maximum privacy, you can also run a model entirely on your own machine using [Ollama](https://ollama.com) — zero external calls.
+
 ## Quick Start for Lawyers
 
 ### If you use Claude Desktop (Chat or Cowork)
