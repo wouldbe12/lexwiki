@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "lexwiki": {
+      "command": "uvx",
+      "args": ["lexwiki", "serve-mcp"],
+      "env": {
+        "LEXWIKI_API_KEY": "${OPENROUTER_API_KEY}",
+        "LEXWIKI_VAULT": "./vault"
+      }
+    }
+  }
+}

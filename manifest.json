@@ -1,0 +1,101 @@
+{
+  "manifest_version": "0.3",
+  "name": "lexwiki",
+  "version": "0.1.0",
+  "display_name": "LexWiki",
+  "description": "LLM-powered legal knowledge base. Ingest contracts, statutes, and case law into a structured Obsidian wiki with backlinks, clause libraries, and self-healing linting.",
+  "long_description": "LexWiki compiles raw legal documents (PDF, DOCX, XLSX, PPTX, HTML, TXT) into a structured, interlinked Obsidian wiki. The LLM classifies documents, generates summaries with key terms and obligations, builds cross-document indexes (clause libraries, precedent maps, jurisdiction trackers), and maintains consistency through automated linting. No vector database required — the LLM navigates its own markdown indexes. Inspired by Karpathy's LLM Knowledge Bases pattern, built for legal.",
+  "author": {
+    "name": "AnyLegal",
+    "email": "hello@anylegal.ai",
+    "url": "https://anylegal.ai"
+  },
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wouldbe12/lexwiki"
+  },
+  "homepage": "https://anylegal.ai/lexwiki",
+  "documentation": "https://github.com/wouldbe12/lexwiki#readme",
+  "keywords": ["legal", "knowledge-base", "obsidian", "wiki", "contracts", "law"],
+  "server": {
+    "type": "uv",
+    "entry_point": "src/lexwiki/mcp_server/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with", "lexwiki",
+        "python", "-c",
+        "from lexwiki.mcp_server.server import serve; serve()"
+      ],
+      "env": {
+        "LEXWIKI_API_KEY": "${user_config.api_key}",
+        "LEXWIKI_VAULT": "${user_config.vault_directory}",
+        "LEXWIKI_PROVIDER": "${user_config.llm_provider}",
+        "LEXWIKI_MODEL": "${user_config.model}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "lexwiki_ingest",
+      "description": "Ingest a legal document (PDF, DOCX, XLSX, PPTX, HTML, TXT) into the knowledge base. Extracts text to markdown with metadata."
+    },
+    {
+      "name": "lexwiki_compile",
+      "description": "Compile raw documents into a structured wiki with backlinks, clause libraries, jurisdiction trackers, and indexes."
+    },
+    {
+      "name": "lexwiki_query",
+      "description": "Query the legal knowledge base using natural language. Returns answers with [[wiki page]] citations."
+    },
+    {
+      "name": "lexwiki_lint",
+      "description": "Check for expired statute citations, inconsistent clauses across contracts, missing standard terms, and broken backlinks."
+    },
+    {
+      "name": "lexwiki_read_page",
+      "description": "Read the full content of a specific wiki page by name."
+    },
+    {
+      "name": "lexwiki_list_pages",
+      "description": "List all pages in the wiki, optionally filtered by category (contracts, statutes, cases, memos, topics, indexes)."
+    }
+  ],
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "LLM API Key",
+      "description": "Your API key for OpenRouter, Anthropic, or OpenAI. Auto-detects provider from key format.",
+      "sensitive": true,
+      "required": true
+    },
+    "vault_directory": {
+      "type": "directory",
+      "title": "Vault Directory",
+      "description": "Where to store your legal knowledge base (raw documents and compiled wiki).",
+      "required": true
+    },
+    "llm_provider": {
+      "type": "string",
+      "title": "LLM Provider",
+      "description": "LLM provider: openrouter, anthropic, openai, or ollama. Leave empty to auto-detect from API key.",
+      "required": false,
+      "default": ""
+    },
+    "model": {
+      "type": "string",
+      "title": "Model",
+      "description": "Model name (e.g. anthropic/claude-sonnet-4-20250514 for OpenRouter, claude-sonnet-4-20250514 for Anthropic direct).",
+      "required": false,
+      "default": "anthropic/claude-sonnet-4-20250514"
+    }
+  },
+  "privacy_policies": [
+    "https://anylegal.ai/privacy"
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"]
+  }
+}

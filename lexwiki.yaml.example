@@ -1,0 +1,41 @@
+# LexWiki Configuration
+project_name: "My Legal KB"
+
+# Directory layout (relative to project root)
+vault_dir: vault
+raw_dir: vault/raw
+wiki_dir: vault/wiki
+
+# LLM provider configuration
+llm:
+  provider: "anthropic"              # anthropic | openai | openrouter | ollama
+  model: "claude-sonnet-4-20250514"
+  api_key_env: "ANTHROPIC_API_KEY"   # env var name (not the key itself)
+  base_url: null                     # override for custom endpoints
+  max_tokens: 4096
+  temperature: 0.2
+
+  # OpenRouter example:
+  # provider: "openrouter"
+  # model: "anthropic/claude-sonnet-4-20250514"
+  # api_key_env: "OPENROUTER_API_KEY"
+
+  # Ollama example:
+  # provider: "ollama"
+  # model: "llama3"
+  # base_url: "http://localhost:11434"
+
+# Default jurisdiction context
+jurisdiction: "general"
+
+# Document types to expect
+legal_domains:
+  - contracts
+  - statutes
+  - case_law
+  - memos
+
+# Compilation settings
+compile:
+  chunk_size: 12000
+  rebuild_indexes_on_compile: true
