@@ -52,7 +52,7 @@ export LEXWIKI_VAULT=~/my-legal-library/vault
 
 Now Claude Code has access to your legal library. All agent teammates in a Cowork session automatically get LexWiki tools too.
 
-### If you use Cursor, Windsurf, or Cline
+### If you use Cursor, Codex, Cline, or another MCP-compatible agent
 
 Add this to your MCP settings (see table below for where the file lives):
 
@@ -73,11 +73,11 @@ Add this to your MCP settings (see table below for where the file lives):
 
 | Tool | Where to put the config |
 |---|---|
-| **Claude Code** | Run the `claude mcp add` command above |
 | **Claude Desktop** | Download the `.mcpb` file above |
+| **Claude Code** | Run the `claude mcp add` command above |
 | **Cursor** | `.cursor/mcp.json` in your project folder |
-| **Windsurf** | `~/.codeium/windsurf/mcp_config.json` |
-| **Cline** | VS Code settings > Cline MCP Servers |
+| **Codex** | MCP config in project settings |
+| **Cline / Roo Code** | VS Code settings > MCP Servers |
 
 ### Standalone (command line)
 
@@ -135,16 +135,9 @@ If you want a visual view of how your documents connect:
 
 This is optional. The library works perfectly without Obsidian — your AI agent accesses it directly.
 
-## Need More? Connect to AnyLegal
+## Built by AnyLegal
 
-LexWiki is great for your own documents (up to a few hundred). When you need more:
-
-- **Jurisdiction databases** — search across thousands of laws and regulations (UAE, Singapore, and more)
-- **Multi-user collaboration** — share libraries across your team
-- **Document editing** — AI-powered redlining and track changes
-- **Email intake** — automatically ingest documents from email
-
-Visit [anylegal.ai](https://anylegal.ai) — LexWiki integrates directly as a tool.
+LexWiki is part of the [anylegal.ai](https://anylegal.ai) ecosystem — AI-powered tools for legal teams. If you're using LexWiki and want to take it further, check out what we're building.
 
 ## License
 
