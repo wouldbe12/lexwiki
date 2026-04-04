@@ -1,6 +1,8 @@
 # LexWiki
 
-**Constantly-updated memory for your legal documents.** Drop in your contracts, statutes, and case law. The AI reads everything, organizes it, cross-references it, and keeps it updated. Any AI agent can use it.
+**Constantly-updated memory for your legal documents.** Drop in your entire legal knowledge — up to 10,000 documents. Templates, actual client contracts, statutes, memos, even emails. The AI reads everything, organizes it, cross-references it, and keeps it updated. Any AI agent can use it.
+
+LexWiki runs separately from your main AI agent and can be 100% private by using an open-source LLM. Your agent reads the compiled library, never your raw documents.
 
 ## What Does It Do?
 
