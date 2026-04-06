@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "display_name": "LexWiki",
   "description": "LLM-powered legal knowledge base. Ingest contracts, statutes, and case law into a structured Obsidian wiki with backlinks, clause libraries, and self-healing linting.",
-  "long_description": "LexWiki compiles raw legal documents (PDF, DOCX, XLSX, PPTX, HTML, TXT) into a structured, interlinked Obsidian wiki. The LLM classifies documents, generates summaries with key terms and obligations, builds cross-document indexes (clause libraries, precedent maps, jurisdiction trackers), and maintains consistency through automated linting. No vector database required — the LLM navigates its own markdown indexes. Inspired by Karpathy's LLM Knowledge Bases pattern, built for legal.",
+  "long_description": "LexWiki compiles raw legal documents (PDF, DOCX, XLSX, PPTX, HTML, TXT) into a structured, interlinked legal library. The LLM classifies documents, generates summaries with key terms and obligations, builds cross-document indexes (clause libraries, precedent maps, jurisdiction trackers), and maintains consistency through automated review. No vector database required — the LLM navigates its own structured indexes.",
   "author": {
     "name": "AnyLegal",
     "email": "hello@anylegal.ai",
