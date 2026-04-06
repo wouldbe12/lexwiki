@@ -135,7 +135,7 @@ class WikiCompiler:
         paths = []
         for filename, prompt_template in indexes.items():
             prompt = prompt_template.format(pages_manifest=manifest)
-            content = complete(prompt, system=INDEX_SYSTEM, config=self.config.llm)
+            content = self._complete_with_retry(prompt, INDEX_SYSTEM)
             out_path = self.wiki_dir / filename
             out_path.write_text(content, encoding="utf-8")
             paths.append(out_path)
@@ -249,6 +249,29 @@ class WikiCompiler:
             if stripped.rstrip().endswith("```"):
                 stripped = stripped.rstrip()[:-3].rstrip()
         return stripped
+
+    def _complete_with_retry(
+        self, prompt: str, system: str, max_retries: int = 2, min_length: int = 50
+    ) -> str:
+        """Call the LLM with retry on garbage/truncated output.
+
+        Retries if the response is shorter than min_length characters,
+        which catches empty responses, truncated output like "I think I'll",
+        and other model failures.
+        """
+        for attempt in range(max_retries + 1):
+            content = complete(prompt, system=system, config=self.config.llm)
+            content = self._clean_llm_output(content)
+            if len(content.strip()) >= min_length:
+                return content
+            if attempt < max_retries:
+                import sys
+                print(
+                    f"Warning: LLM returned short response ({len(content.strip())} chars), "
+                    f"retrying ({attempt + 1}/{max_retries})...",
+                    file=sys.stderr,
+                )
+        return content  # return whatever we got on last attempt
 
     def _get_known_pages(self) -> str:
         """Get a list of known wiki page names for backlinking."""
