@@ -137,6 +137,15 @@ class WikiCompiler:
             prompt = prompt_template.format(pages_manifest=manifest)
             content = self._complete_with_retry(prompt, INDEX_SYSTEM)
             out_path = self.wiki_dir / filename
+            # Never overwrite a good index with empty/garbage output
+            if len(content.strip()) < 50:
+                import sys
+                print(
+                    f"Warning: Skipping {filename} — LLM returned insufficient content "
+                    f"({len(content.strip())} chars). Keeping existing file.",
+                    file=sys.stderr,
+                )
+                continue
             out_path.write_text(content, encoding="utf-8")
             paths.append(out_path)
 
