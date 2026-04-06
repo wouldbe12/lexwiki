@@ -118,6 +118,9 @@ def _call_openai_compat(
         "max_tokens": max_tokens,
         "temperature": temperature,
         "messages": messages,
+        # Cap reasoning tokens so thinking models don't exhaust the budget
+        # before producing content. Low effort = 10% of max_tokens for reasoning.
+        "reasoning": {"effort": "low"},
     }
     resp = httpx.post(
         f"{base_url}/v1/chat/completions", headers=headers, json=body, timeout=_TIMEOUT
