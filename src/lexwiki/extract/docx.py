@@ -57,25 +57,9 @@ def _extract_legacy_doc(source: Path) -> tuple[str, None]:
     except FileNotFoundError:
         pass
 
-    # Last resort: extract readable strings from binary
-    raw = source.read_bytes()
-    # .doc files store text in unicode or ascii runs
-    text_parts = []
-    current = []
-    for byte in raw:
-        if 32 <= byte < 127 or byte in (10, 13, 9):
-            current.append(chr(byte))
-        else:
-            if len(current) > 3:  # skip noise
-                text_parts.append("".join(current))
-            current = []
-    if current and len(current) > 3:
-        text_parts.append("".join(current))
-
-    text = "\n".join(text_parts)
-    if len(text.strip()) < 50:
-        raise ValueError(
-            f"Cannot extract text from legacy .doc file: {source.name}. "
-            f"Install antiword (apt install antiword) or convert to .docx first."
-        )
-    return text, None
+    # No binary fallback — it produces garbage
+    raise ValueError(
+        f"Cannot extract text from legacy .doc file: {source.name}\n"
+        f"Install antiword: sudo apt install antiword (Linux) or brew install antiword (Mac)\n"
+        f"Or convert the file to .docx first."
+    )
