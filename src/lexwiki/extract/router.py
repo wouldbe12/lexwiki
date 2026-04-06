@@ -10,7 +10,6 @@ from lexwiki.types import IngestResult
 _EXTRACTORS = {
     ".pdf": "lexwiki.extract.pdf:extract_pdf",
     ".docx": "lexwiki.extract.docx:extract_docx",
-    ".doc": "lexwiki.extract.docx:extract_docx",
     ".xlsx": "lexwiki.extract.xlsx:extract_xlsx",
     ".xls": "lexwiki.extract.xlsx:extract_xlsx",
     ".pptx": "lexwiki.extract.pptx:extract_pptx",
