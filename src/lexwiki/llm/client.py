@@ -126,11 +126,9 @@ def _call_openai_compat(
     data = resp.json()
     choice = data["choices"][0]
     content = choice["message"].get("content")
-    # Reasoning models (kimi, deepseek-r1) may put output in reasoning field
-    # and return content=null if max_tokens is exhausted by chain-of-thought
-    if not content:
-        content = choice["message"].get("reasoning") or ""
-    return content
+    # Reasoning models (kimi, deepseek-r1) return content=null when max_tokens
+    # is exhausted by chain-of-thought. Return empty string so retry logic kicks in.
+    return content or ""
 
 
 def _call_ollama(
