@@ -17,3 +17,7 @@ venv/
 .coverage
 htmlcov/
 vault/
+demo-vault/
+.obsidian/
+*.mcpb
+posts.md
