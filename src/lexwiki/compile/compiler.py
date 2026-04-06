@@ -239,6 +239,8 @@ class WikiCompiler:
         which results in the content being treated as a code block rather than
         rendered markdown. This strips that wrapper.
         """
+        if not text:
+            return ""
         stripped = text.strip()
         # Strip outer ```markdown ... ``` fence
         if stripped.startswith("```"):
