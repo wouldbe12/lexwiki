@@ -124,7 +124,13 @@ def _call_openai_compat(
     )
     resp.raise_for_status()
     data = resp.json()
-    return data["choices"][0]["message"]["content"]
+    choice = data["choices"][0]
+    content = choice["message"].get("content")
+    # Reasoning models (kimi, deepseek-r1) may put output in reasoning field
+    # and return content=null if max_tokens is exhausted by chain-of-thought
+    if not content:
+        content = choice["message"].get("reasoning") or ""
+    return content
 
 
 def _call_ollama(
