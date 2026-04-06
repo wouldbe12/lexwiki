@@ -43,12 +43,18 @@ and brief descriptions. Include document count per jurisdiction.
 PARTY_INDEX_PROMPT = """\
 Generate the party/entity index page (_by_party.md).
 
-All wiki pages with their frontmatter:
+All wiki pages with their content summaries:
 {pages_manifest}
 
-List all parties and entities mentioned across documents. For each party, list the documents \
-they appear in with [[page-name]] links and their role (e.g. "party to contract", "plaintiff", \
-"defendant", "regulator"). Group related entities together.
+Instructions:
+1. Read through ALL the wiki pages above carefully
+2. Extract every named party, entity, company, person, and organization mentioned
+3. For each entity, list every document they appear in using [[page-name]] links
+4. Describe their role in each document (e.g. "investor", "company", "founder", "disclosing party")
+5. Group related entities together (e.g. same company appearing in multiple documents)
+
+The output should be a comprehensive markdown page with ## headings for each major entity \
+and bullet points listing their document appearances with [[page-name]] links.
 """
 
 CLAUSE_LIBRARY_PROMPT = """\

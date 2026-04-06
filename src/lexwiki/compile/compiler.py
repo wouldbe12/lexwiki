@@ -283,8 +283,12 @@ class WikiCompiler:
             pages.append(str(rel.with_suffix("")))
         return "\n".join(sorted(pages)) if pages else "(no existing pages)"
 
-    def _build_pages_manifest(self) -> str:
-        """Build a manifest of all wiki pages with their frontmatter for index generation."""
+    def _build_pages_manifest(self, include_content: bool = True) -> str:
+        """Build a manifest of all wiki pages for index generation.
+
+        Includes frontmatter and the first ~500 chars of content so the LLM
+        can extract entities, clauses, and relationships — not just metadata.
+        """
         entries = []
         for md_file in sorted(self.wiki_dir.rglob("*.md")):
             if md_file.name.startswith("_"):
@@ -295,11 +299,23 @@ class WikiCompiler:
                 continue
 
             # Extract frontmatter
-            fm_match = re.match(r"^---\n(.*?)\n---", text, re.DOTALL)
-            fm = fm_match.group(1) if fm_match else ""
+            fm_match = re.match(r"^---\n(.*?)\n---\n?(.*)", text, re.DOTALL)
+            if fm_match:
+                fm = fm_match.group(1)
+                body = fm_match.group(2).strip()
+            else:
+                fm = ""
+                body = text.strip()
 
             rel = md_file.relative_to(self.wiki_dir)
-            entries.append(f"## [[{rel.stem}]] ({rel})\n{fm}\n")
+            entry = f"## [[{rel.stem}]] ({rel})\n{fm}\n"
+            if include_content and body:
+                # Include first ~500 chars of body for context
+                snippet = body[:500]
+                if len(body) > 500:
+                    snippet += "\n[...]"
+                entry += f"\nContent preview:\n{snippet}\n"
+            entries.append(entry)
 
         return "\n".join(entries)
 
