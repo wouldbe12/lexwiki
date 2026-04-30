@@ -106,6 +106,20 @@ class WikiCompiler:
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / f"{slug}.md"
 
+        # Slug collision: when two raw files produce the same title (e.g.
+        # a doc and its `_v2` / `_redacted` sibling, or near-duplicate
+        # contracts), `_slugify(meta.title)` yields the same slug and the
+        # second compile silently overwrites the first. Append a 6-char
+        # hash of `raw_path.name` so each source gets a unique, stable slug.
+        # The hash is deterministic, so the same source always lands at the
+        # same slug across recompiles — important for downstream skip logic
+        # that keys per-doc state by slug.
+        if out_path.exists():
+            import hashlib
+            suffix = hashlib.sha256(raw_path.name.encode("utf-8")).hexdigest()[:6]
+            slug = f"{slug}-{suffix}"
+            out_path = out_dir / f"{slug}.md"
+
         # Ensure the content has frontmatter; if LLM didn't include it, add it
         if not wiki_content.startswith("---"):
             wiki_content = self._build_frontmatter(meta, raw_path) + wiki_content
