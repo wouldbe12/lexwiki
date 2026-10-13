@@ -1,12 +1,12 @@
 {
   "manifest_version": "0.3",
   "name": "lexwiki",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "display_name": "LexWiki",
   "description": "LLM-powered legal knowledge base. Ingest contracts, statutes, and case law into a structured Obsidian wiki with backlinks, clause libraries, and self-healing linting.",
   "long_description": "LexWiki compiles raw legal documents (PDF, DOCX, XLSX, PPTX, HTML, TXT) into a structured, interlinked legal library. The LLM classifies documents, generates summaries with key terms and obligations, builds cross-document indexes (clause libraries, precedent maps, jurisdiction trackers), and maintains consistency through automated review. No vector database required — the LLM navigates its own structured indexes.",
   "author": {
-    "name": "AnyLegal",
+    "name": "Anylegal.ai",
     "email": "hello@anylegal.ai",
     "url": "https://anylegal.ai"
   },
@@ -24,6 +24,8 @@
     "mcp_config": {
       "command": "uvx",
       "args": [
+        "--from",
+        "https://github.com/wouldbe12/lexwiki/releases/download/v0.2.0/lexwiki-0.2.0-py3-none-any.whl",
         "lexwiki", "serve-mcp"
       ],
       "env": {
@@ -68,7 +70,7 @@
     "api_key": {
       "type": "string",
       "title": "LLM API Key",
-      "description": "Your API key for OpenRouter, Anthropic, or OpenAI. Auto-detects provider from key format.",
+      "description": "Your OpenRouter API key (starts with sk-or-). Get one at openrouter.ai.",
       "sensitive": true,
       "required": true
     },
@@ -81,16 +83,16 @@
     "llm_provider": {
       "type": "string",
       "title": "LLM Provider",
-      "description": "LLM provider: openrouter, anthropic, openai, or ollama. Leave empty to auto-detect from API key.",
+      "description": "LLM provider: openrouter (default) or ollama. Leave empty to auto-detect from the API key.",
       "required": false,
       "default": ""
     },
     "model": {
       "type": "string",
       "title": "Model",
-      "description": "Model name (e.g. anthropic/claude-sonnet-4-20250514 for OpenRouter, claude-sonnet-4-20250514 for Anthropic direct).",
+      "description": "OpenRouter model, e.g. deepseek/deepseek-v4.1-flash (default), z-ai/glm-5.3-flash, qwen/qwen3.8-flash or moonshotai/kimi-k3. Leave empty for the default.",
       "required": false,
-      "default": "anthropic/claude-sonnet-4-20250514"
+      "default": ""
     }
   },
   "privacy_policies": [

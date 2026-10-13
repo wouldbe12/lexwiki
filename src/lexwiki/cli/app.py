@@ -109,7 +109,7 @@ def compile(
             console.print(f"[green]Compiled {len(pages)} pages from {file.name}.[/green]")
         else:
             stats = compiler.compile_all(full=full)
-            console.print(f"[green]Compilation complete.[/green]")
+            console.print("[green]Compilation complete.[/green]")
             console.print(f"  Pages created: {stats.pages_created}")
             console.print(f"  Pages updated: {stats.pages_updated}")
             console.print(f"  Indexes rebuilt: {stats.indexes_rebuilt}")
@@ -135,7 +135,7 @@ def query(
         answer = engine.query(question, scope=scope)
 
     console.print()
-    console.print(answer)
+    console.print(answer, markup=False)  # keep [[page]] citations literal
 
     if save:
         import re

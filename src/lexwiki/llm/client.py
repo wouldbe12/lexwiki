@@ -50,18 +50,25 @@ def complete(
     Supports Anthropic, OpenAI, OpenRouter, and Ollama.
     """
     cfg = config or LLMConfig()
+    if not cfg.model:
+        raise ValueError(
+            f"No model configured for provider '{cfg.provider}'. Set LEXWIKI_MODEL."
+        )
     base_url = _get_base_url(cfg)
     api_key = _get_api_key(cfg)
     mt = max_tokens or cfg.max_tokens
     temp = temperature if temperature is not None else cfg.temperature
 
     if cfg.provider == "anthropic":
-        return _call_anthropic(base_url, api_key, cfg.model, prompt, system, mt, temp)
+        return _call_anthropic(base_url, api_key, cfg.model, prompt, system, mt)
     elif cfg.provider == "ollama":
         return _call_ollama(base_url, cfg.model, prompt, system, mt, temp)
     else:
         # openai and openrouter share the same API shape
-        return _call_openai_compat(base_url, api_key, cfg.model, prompt, system, mt, temp)
+        return _call_openai_compat(
+            base_url, api_key, cfg.model, prompt, system, mt, temp,
+            disable_reasoning=cfg.provider == "openrouter",
+        )
 
 
 def complete_structured(
@@ -76,17 +83,18 @@ def complete_structured(
 
 def _call_anthropic(
     base_url: str, api_key: str, model: str,
-    prompt: str, system: str, max_tokens: int, temperature: float,
+    prompt: str, system: str, max_tokens: int,
 ) -> str:
     headers = {
         "x-api-key": api_key,
         "anthropic-version": "2023-06-01",
         "content-type": "application/json",
     }
+    # No temperature: current Claude models (Sonnet 5, Opus 4.7+) reject
+    # sampling parameters with a 400.
     body: dict = {
         "model": model,
         "max_tokens": max_tokens,
-        "temperature": temperature,
         "messages": [{"role": "user", "content": prompt}],
     }
     if system:
@@ -97,12 +105,14 @@ def _call_anthropic(
     )
     resp.raise_for_status()
     data = resp.json()
-    return data["content"][0]["text"]
+    # Models that think by default put thinking blocks before the text.
+    return "".join(b["text"] for b in data["content"] if b["type"] == "text")
 
 
 def _call_openai_compat(
     base_url: str, api_key: str, model: str,
     prompt: str, system: str, max_tokens: int, temperature: float,
+    disable_reasoning: bool = False,
 ) -> str:
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -118,13 +128,24 @@ def _call_openai_compat(
         "max_tokens": max_tokens,
         "temperature": temperature,
         "messages": messages,
-        # Cap reasoning tokens so thinking models don't exhaust the budget
-        # before producing content. Low effort = 10% of max_tokens for reasoning.
-        "reasoning": {"effort": "low"},
     }
-    resp = httpx.post(
-        f"{base_url}/v1/chat/completions", headers=headers, json=body, timeout=_TIMEOUT
-    )
+    url = f"{base_url}/v1/chat/completions"
+    if disable_reasoning:
+        # OpenRouter's unified reasoning switch. Compile and query don't
+        # benefit from thinking, and on reasoning models it eats the output
+        # budget. Models where reasoning is mandatory reject this with a 400;
+        # retry those once at low effort so thinking can't take the whole budget.
+        resp = httpx.post(
+            url, headers=headers, json={**body, "reasoning": {"enabled": False}},
+            timeout=_TIMEOUT,
+        )
+        if resp.status_code == 400 and "reasoning" in resp.text.lower():
+            resp = httpx.post(
+                url, headers=headers, json={**body, "reasoning": {"effort": "low"}},
+                timeout=_TIMEOUT,
+            )
+    else:
+        resp = httpx.post(url, headers=headers, json=body, timeout=_TIMEOUT)
     resp.raise_for_status()
     data = resp.json()
     choice = data["choices"][0]

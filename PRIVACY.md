@@ -8,7 +8,7 @@ LexWiki is an open-source tool that runs entirely on your local machine. Your le
 
 ## Data Processing
 
-- **Local storage:** All documents, the compiled wiki, and indexes are stored locally in the vault directory you specify. LexWiki does not transmit your documents to any server operated by AnyLegal.
+- **Local storage:** All documents, the compiled wiki, and indexes are stored locally in the vault directory you specify. LexWiki does not transmit your documents to any server operated by Anylegal.ai.
 
 - **LLM API calls:** When you use compile, query, or lint commands, document content is sent to the LLM provider you configure (e.g., Anthropic, OpenAI, OpenRouter, or a local Ollama instance). LexWiki does not proxy, log, or store these API calls. Review your LLM provider's privacy policy for how they handle data sent to their API.
 
@@ -23,7 +23,7 @@ API keys are stored locally:
 - In Claude Desktop's OS keychain (when installed as a .mcpb extension)
 - In environment variables (when used via CLI or MCP)
 
-LexWiki never transmits API keys to AnyLegal or any third party.
+LexWiki never transmits API keys to Anylegal.ai or any third party.
 
 ## Third-Party Services
 
@@ -44,5 +44,5 @@ LexWiki is open source under the AGPL-3.0 license. You can audit the complete so
 
 For privacy questions: hello@anylegal.ai
 
-AnyLegal  
+Anylegal.ai  
 https://anylegal.ai

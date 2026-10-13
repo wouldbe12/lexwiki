@@ -1,6 +1,5 @@
 """Tests for the extraction pipeline."""
 
-from pathlib import Path
 from lexwiki.extract.router import ingest_file
 from lexwiki.extract.plain import extract_plain
 from lexwiki.extract._html_to_md import html_to_markdown

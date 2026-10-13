@@ -109,12 +109,12 @@ class WikiCompiler:
         # Slug collision: when two raw files produce the same title (e.g.
         # a doc and its `_v2` / `_redacted` sibling, or near-duplicate
         # contracts), `_slugify(meta.title)` yields the same slug and the
-        # second compile silently overwrites the first. Append a 6-char
+        # second compile would silently overwrite the first. Append a 6-char
         # hash of `raw_path.name` so each source gets a unique, stable slug.
-        # The hash is deterministic, so the same source always lands at the
-        # same slug across recompiles — important for downstream skip logic
-        # that keys per-doc state by slug.
-        if out_path.exists():
+        # A page this same source produced last time is not a collision:
+        # recompiling a changed document overwrites its own page.
+        previous_page = self._previous_page(raw_path)
+        if out_path.exists() and out_path != previous_page:
             import hashlib
             suffix = hashlib.sha256(raw_path.name.encode("utf-8")).hexdigest()[:6]
             slug = f"{slug}-{suffix}"
@@ -126,8 +126,12 @@ class WikiCompiler:
 
         out_path.write_text(wiki_content, encoding="utf-8")
 
-        # Write a compile marker
-        self._mark_compiled(raw_path)
+        # The recompile may have produced a new title or type; drop the old
+        # page so the wiki doesn't keep a stale copy of the same document.
+        if previous_page and previous_page != out_path and previous_page.exists():
+            previous_page.unlink()
+
+        self._mark_compiled(raw_path, out_path)
 
         return [out_path]
 
@@ -347,11 +351,25 @@ class WikiCompiler:
             return False
         return marker.stat().st_mtime >= raw_path.stat().st_mtime
 
-    def _mark_compiled(self, raw_path: Path):
-        """Write a compile marker for a raw file."""
+    def _mark_compiled(self, raw_path: Path, page_path: Path):
+        """Write a compile marker recording which wiki page the raw file produced."""
         marker = self._marker_path(raw_path)
         marker.parent.mkdir(parents=True, exist_ok=True)
-        marker.write_text(datetime.now(timezone.utc).isoformat())
+        marker.write_text(json.dumps({
+            "compiled_at": datetime.now(timezone.utc).isoformat(),
+            "page": page_path.relative_to(self.wiki_dir).as_posix(),
+        }))
+
+    def _previous_page(self, raw_path: Path) -> Path | None:
+        """Return the wiki page this raw file produced on its last compile, if recorded."""
+        marker = self._marker_path(raw_path)
+        if not marker.exists():
+            return None
+        try:
+            page = json.loads(marker.read_text()).get("page")
+        except (json.JSONDecodeError, AttributeError):
+            return None  # marker written by LexWiki <= 0.1.x: a bare timestamp
+        return self.wiki_dir / page if page else None
 
     def _marker_path(self, raw_path: Path) -> Path:
         return self.raw_dir / ".compiled" / f"{raw_path.stem}.marker"

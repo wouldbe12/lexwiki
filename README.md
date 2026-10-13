@@ -1,8 +1,8 @@
 # LexWiki
 
-**Constantly-updated memory for your legal documents.** Drop in your entire legal knowledge — up to 10,000 documents. Templates, actual client contracts, statutes, memos, even emails. The AI reads everything, organizes it, cross-references it, and keeps it updated. Any AI agent can use it.
+**Constantly-updated memory for your legal documents.** Drop in your legal knowledge: templates, actual client contracts, statutes, memos, even emails. The AI reads everything, organizes it, cross-references it, and keeps it updated. Any AI agent can use it.
 
-LexWiki runs separately from your main AI agent and can be 100% private by using an open-source LLM. Your agent reads the compiled library, never your raw documents.
+LexWiki runs separately from your main AI agent and builds the library with an open-weights LLM you choose, through OpenRouter or fully on your own machine. Your agent reads the compiled library, never your raw documents.
 
 ## What Does It Do?
 
@@ -14,7 +14,7 @@ You have a folder of legal documents. LexWiki reads all of them and builds a str
 - **Precedent map** — which cases cite which statutes
 - **Master index** — a table of contents for the whole library
 
-When you add a new document, LexWiki reads it, figures out how it connects to everything else, and updates the library automatically.
+When you add a new document and recompile, LexWiki reads it, figures out how it connects to everything else, and updates the library. Unchanged documents are skipped.
 
 When you ask it to review itself, it finds expired statute citations, inconsistent clause language across contracts, and missing standard terms. The library keeps itself clean.
 
@@ -29,31 +29,34 @@ When you tell your agent to ingest a document, LexWiki extracts the text and sav
 
 **Your main agent (Claude, Cursor, etc.) only reads from `wiki/`.** It never sees your raw documents. The LLM that builds the library is a separate call — and you choose which model handles it.
 
-### Setting Up a Private LLM via OpenRouter
+### Setting Up an Open-Weights LLM via OpenRouter
 
-If you don't want any proprietary AI company processing your documents, use an open-source model through [OpenRouter](https://openrouter.ai):
+LexWiki is built for open-weights models, so no proprietary AI company processes your documents. The easiest way to run them is [OpenRouter](https://openrouter.ai):
 
 1. **Register** at [openrouter.ai](https://openrouter.ai) — it's free to sign up
 2. **Add credits** — $5 is enough to process hundreds of documents
 3. **Copy your API key** from the [Keys page](https://openrouter.ai/keys) (starts with `sk-or-`)
-4. **Pick a powerful open-source model** for privacy. Good choices:
-   - `stepfun/step-3.5-flash` — fast, cheap, tested with LexWiki
-   - `moonshotai/kimi-k2.5` — strong reasoning, great for legal analysis
-5. **Set your environment variables:**
+4. **Turn on Zero Data Retention** in your OpenRouter [privacy settings](https://openrouter.ai/settings/privacy), so your requests are only routed to providers that don't store prompts.
+5. **Pick an open-weights model.** Good choices:
+   - `deepseek/deepseek-v4.1-flash`: the default. Fast and very cheap, a good fit for compiling large libraries
+   - `z-ai/glm-5.3-flash`: fast, strong at structured extraction
+   - `qwen/qwen3.8-flash`: fast, good with non-English documents
+   - `moonshotai/kimi-k3`: the strongest of the four, for deeper legal analysis at a higher price
+6. **Set your environment variables:**
 
 ```bash
-export LEXWIKI_API_KEY=sk-or-v1-your-key-here
-export LEXWIKI_MODEL=stepfun/step-3.5-flash
+export OPENROUTER_API_KEY=sk-or-v1-your-key-here
+export LEXWIKI_MODEL=deepseek/deepseek-v4.1-flash   # optional, this is the default
 export LEXWIKI_VAULT=~/my-legal-library/vault
 ```
 
-With this setup, your documents are processed by an open-source model through OpenRouter's API. No data goes to Anthropic, OpenAI, or any other proprietary provider. For maximum privacy, you can also run a model entirely on your own machine using [Ollama](https://ollama.com) — zero external calls.
+With this setup, your documents are processed by an open-weights model through OpenRouter's API. For maximum privacy, run a model entirely on your own machine with [Ollama](https://ollama.com) (for example `LEXWIKI_PROVIDER=ollama LEXWIKI_MODEL=qwen3.6`), and nothing leaves your computer.
 
 ## Quick Start for Lawyers
 
 ### If you use Claude Desktop (Chat or Cowork)
 
-1. Download [`lexwiki.mcpb`](https://github.com/wouldbe12/lexwiki/releases/latest) from Releases
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) once (LexWiki runs through it), then download [`lexwiki.mcpb`](https://github.com/wouldbe12/lexwiki/releases/latest) from Releases
 2. Double-click the file — Claude Desktop opens an install dialog
 3. Enter your API key (get one free at [openrouter.ai](https://openrouter.ai))
 4. Pick a folder where you want your library stored
@@ -68,20 +71,16 @@ Works in both Chat and Cowork modes. In Cowork, Claude can handle multi-step tas
 
 ### If you use Claude Code
 
-Run this once in your terminal:
+Run this once in your terminal (requires [uv](https://docs.astral.sh/uv/getting-started/installation/)):
 
 ```bash
-claude mcp add --transport stdio lexwiki -- uvx lexwiki serve-mcp
+claude mcp add --transport stdio --scope user \
+  -e OPENROUTER_API_KEY=sk-or-v1-your-key-here \
+  -e LEXWIKI_VAULT=$HOME/my-legal-library/vault \
+  lexwiki -- uvx --from git+https://github.com/wouldbe12/lexwiki lexwiki serve-mcp
 ```
 
-Set your API key:
-
-```bash
-export OPENROUTER_API_KEY=sk-or-v1-your-key-here
-export LEXWIKI_VAULT=~/my-legal-library/vault
-```
-
-Now Claude Code has access to your legal library. All agent teammates in a Cowork session automatically get LexWiki tools too.
+Now Claude Code has access to your legal library in every project.
 
 ### If you use Cursor, Codex, Cline, or another MCP-compatible agent
 
@@ -92,9 +91,9 @@ Add this to your MCP settings (see table below for where the file lives):
   "mcpServers": {
     "lexwiki": {
       "command": "uvx",
-      "args": ["lexwiki", "serve-mcp"],
+      "args": ["--from", "git+https://github.com/wouldbe12/lexwiki", "lexwiki", "serve-mcp"],
       "env": {
-        "LEXWIKI_API_KEY": "your-api-key-here",
+        "OPENROUTER_API_KEY": "sk-or-v1-your-key-here",
         "LEXWIKI_VAULT": "/path/to/your/vault"
       }
     }
@@ -113,11 +112,11 @@ Add this to your MCP settings (see table below for where the file lives):
 ### Standalone (command line)
 
 ```bash
-pip install lexwiki
+pip install git+https://github.com/wouldbe12/lexwiki
 
 lexwiki init my-legal-library
 cd my-legal-library
-# Edit lexwiki.yaml with your API key
+export OPENROUTER_API_KEY=sk-or-v1-your-key-here
 lexwiki ingest ~/contracts/
 lexwiki compile
 lexwiki query "What are the termination provisions?"
@@ -140,20 +139,18 @@ Once LexWiki is connected, your AI agent gets these tools:
 
 ## Supported Documents
 
-PDF, Word (.docx, .doc), Excel (.xlsx), PowerPoint (.pptx), HTML, and plain text.
+PDF, Word (.docx), Excel (.xlsx), PowerPoint (.pptx), HTML, Markdown, and plain text. Convert older .doc/.xls/.ppt files to the modern formats first.
 
 ## Privacy
 
-**Your documents never leave your machine.** LexWiki runs locally. The only external call is to the AI model you choose — and you can choose a fully private one:
+LexWiki runs locally and stores everything in your vault folder. The only external call is to the model that builds the library, and you choose it:
 
-- **OpenRouter** — access hundreds of models, including private/open-source ones
-- **Anthropic** (Claude) — direct API
-- **OpenAI** (GPT) — direct API
-- **Ollama** — runs completely on your machine, zero external calls
+- **OpenRouter** with an open-weights model (the default). Turn on Zero Data Retention in your OpenRouter settings.
+- **Ollama**, running completely on your machine with zero external calls.
 
-Your main AI agent (Claude, Cursor, etc.) only reads the compiled library, not your raw documents. You can use a different, private model to build the library.
+Your main AI agent (Claude, Cursor, etc.) only reads the compiled library, not your raw documents.
 
-LexWiki auto-detects your provider from the API key format. No config file needed.
+LexWiki only picks up `LEXWIKI_API_KEY` or `OPENROUTER_API_KEY` from your environment, never a generic provider key your agent happens to have set. No config file needed.
 
 ## Viewing the Library in Obsidian (Optional)
 
@@ -166,12 +163,12 @@ If you want a visual view of how your documents connect:
 
 This is optional. The library works perfectly without Obsidian — your AI agent accesses it directly.
 
-## Built by AnyLegal
+## Built by Anylegal.ai
 
-LexWiki is part of the [anylegal.ai](https://anylegal.ai) ecosystem — AI-powered tools for legal teams. If you're using LexWiki and want to take it further, check out what we're building.
+LexWiki is part of the [Anylegal.ai](https://anylegal.ai) ecosystem — AI-powered tools for legal teams. If you're using LexWiki and want to take it further, check out what we're building.
 
 ## License
 
 AGPL-3.0 — see [LICENSE](LICENSE). [Privacy policy](PRIVACY.md).
 
-Built by [AnyLegal](https://anylegal.ai).
+Built by [Anylegal.ai](https://anylegal.ai).

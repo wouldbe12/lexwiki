@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lexwiki"
-version = "0.1.0"
+version = "0.2.0"
 description = "LLM-powered legal knowledge base compiler. Ingest legal documents, compile structured Obsidian wikis, query with natural language, lint for consistency."
 readme = "README.md"
 license = "AGPL-3.0-only"
 requires-python = ">=3.10"
 authors = [
-    { name = "AnyLegal", email = "hello@anylegal.ai" },
+    { name = "Anylegal.ai", email = "hello@anylegal.ai" },
 ]
 keywords = ["legal", "knowledge-base", "llm", "obsidian", "wiki", "mcp"]
 classifiers = [
@@ -30,7 +30,7 @@ dependencies = [
     "python-pptx>=0.6.21",
     "pyyaml>=6.0",
     "rich>=13.0",
-    "mcp>=1.0.0",
+    "mcp>=1.25,<3",
 ]
 
 [project.optional-dependencies]

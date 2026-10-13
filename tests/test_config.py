@@ -1,15 +1,15 @@
 """Tests for configuration loading and project initialization."""
 
 from pathlib import Path
-from lexwiki.config import load_config, init_project, LexWikiConfig
+from lexwiki.config import load_config, init_project
 
 
 def test_default_config():
     """Loading config with no file returns defaults."""
     cfg = load_config(Path("/nonexistent/lexwiki.yaml"))
     assert cfg.project_name == "LexWiki Project"
-    assert cfg.llm.provider == "anthropic"
-    assert cfg.llm.model == "claude-sonnet-4-20250514"
+    assert cfg.llm.provider == "openrouter"
+    assert cfg.llm.model == "deepseek/deepseek-v4.1-flash"
 
 
 def test_load_config_from_yaml(tmp_path):
@@ -19,7 +19,7 @@ def test_load_config_from_yaml(tmp_path):
 project_name: "Test Project"
 llm:
   provider: "openrouter"
-  model: "anthropic/claude-sonnet-4-20250514"
+  model: "z-ai/glm-5.3-flash"
   api_key_env: "OPENROUTER_API_KEY"
 jurisdiction: "UAE"
 """)

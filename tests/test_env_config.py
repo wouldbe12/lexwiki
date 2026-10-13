@@ -1,7 +1,6 @@
 """Test that LEXWIKI_VAULT env var resolves paths correctly from any CWD."""
 
 import os
-from pathlib import Path
 
 
 def test_vault_env_overrides_yaml(tmp_path):
@@ -52,3 +51,15 @@ def test_vault_env_absolute_from_any_cwd(tmp_path, monkeypatch):
     assert cfg.vault_dir == vault
     assert cfg.wiki_dir == vault / "wiki"
     assert (cfg.wiki_dir / "_index.md").exists()
+
+
+def test_unset_mcpb_placeholder_is_ignored(monkeypatch):
+    """Claude Desktop passes unset optional settings as literal ${user_config.*}."""
+    from lexwiki.config import load_config
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    monkeypatch.setenv("LEXWIKI_MODEL", "${user_config.model}")
+    monkeypatch.setenv("LEXWIKI_PROVIDER", "${user_config.llm_provider}")
+    cfg = load_config()
+    assert cfg.llm.provider == "openrouter"
+    assert cfg.llm.model == "deepseek/deepseek-v4.1-flash"

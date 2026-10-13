@@ -8,21 +8,21 @@ wiki_dir: vault/wiki
 
 # LLM provider configuration
 llm:
-  provider: "anthropic"              # anthropic | openai | openrouter | ollama
-  model: "claude-sonnet-4-20250514"
-  api_key_env: "ANTHROPIC_API_KEY"   # env var name (not the key itself)
+  provider: "openrouter"             # openrouter | ollama | openai | anthropic
+  model: "deepseek/deepseek-v4.1-flash"
+  api_key_env: "OPENROUTER_API_KEY"  # env var name (not the key itself)
   base_url: null                     # override for custom endpoints
   max_tokens: 4096
   temperature: 0.2
 
-  # OpenRouter example:
-  # provider: "openrouter"
-  # model: "anthropic/claude-sonnet-4-20250514"
-  # api_key_env: "OPENROUTER_API_KEY"
+  # Other open-weights models on OpenRouter:
+  # model: "z-ai/glm-5.3-flash"
+  # model: "qwen/qwen3.8-flash"
+  # model: "moonshotai/kimi-k3"
 
-  # Ollama example:
+  # Fully local with Ollama:
   # provider: "ollama"
-  # model: "llama3"
+  # model: "qwen3.6"
   # base_url: "http://localhost:11434"
 
 # Default jurisdiction context

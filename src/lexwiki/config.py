@@ -11,9 +11,9 @@ import yaml
 
 @dataclass
 class LLMConfig:
-    provider: str = "anthropic"  # anthropic | openai | openrouter | ollama
-    model: str = "claude-sonnet-4-20250514"
-    api_key_env: str = "ANTHROPIC_API_KEY"
+    provider: str = "openrouter"  # openrouter | ollama | openai | anthropic
+    model: str = "deepseek/deepseek-v4.1-flash"
+    api_key_env: str = "OPENROUTER_API_KEY"
     base_url: str | None = None
     max_tokens: int = 16000
     temperature: float = 0.2
@@ -45,6 +45,14 @@ class LexWikiConfig:
         return self.vault_dir.parent
 
 
+# Used when no model is configured. Only open-weights defaults; for OpenAI
+# and Anthropic the model must be set explicitly.
+_DEFAULT_MODELS = {
+    "openrouter": "deepseek/deepseek-v4.1-flash",
+    "ollama": "qwen3.6",
+}
+
+
 def _detect_provider_from_key(api_key: str) -> str:
     """Guess the provider from the API key format."""
     if api_key.startswith("sk-or-"):
@@ -57,7 +65,12 @@ def _detect_provider_from_key(api_key: str) -> str:
 
 
 def _env(name: str, default: str = "") -> str:
-    return os.environ.get(name, default)
+    value = os.environ.get(name, default)
+    # Claude Desktop passes an unset optional .mcpb setting through as the
+    # literal placeholder, e.g. "${user_config.model}".
+    if value.startswith("${user_config."):
+        return default
+    return value
 
 
 def load_config(path: Path | None = None) -> LexWikiConfig:
@@ -72,12 +85,11 @@ def load_config(path: Path | None = None) -> LexWikiConfig:
     Environment variables (for .mcpb / Docker / CI):
         LEXWIKI_VAULT       - vault directory path (absolute recommended)
         LEXWIKI_API_KEY     - LLM API key (auto-detects provider)
-        LEXWIKI_PROVIDER    - LLM provider (anthropic|openai|openrouter|ollama)
+        LEXWIKI_PROVIDER    - LLM provider (openrouter|ollama|openai|anthropic)
         LEXWIKI_MODEL       - LLM model name
         LEXWIKI_BASE_URL    - Custom LLM endpoint
 
-    Also checks common API key env vars as fallback:
-        OPENROUTER_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY
+    Also checks OPENROUTER_API_KEY as a fallback key.
     """
     if path is None:
         # Search for config file
@@ -97,28 +109,27 @@ def load_config(path: Path | None = None) -> LexWikiConfig:
         raw = {}
 
     # Resolve LLM config: env vars > yaml > defaults
-    env_api_key = (
-        _env("LEXWIKI_API_KEY")
-        or _env("OPENROUTER_API_KEY")
-        or _env("ANTHROPIC_API_KEY")
-        or _env("OPENAI_API_KEY")
-    )
+    # Generic ANTHROPIC_API_KEY / OPENAI_API_KEY are deliberately not picked
+    # up: many agent hosts set them, and documents would go to that provider
+    # without the user choosing it. Use LEXWIKI_API_KEY for those providers.
+    env_api_key = _env("LEXWIKI_API_KEY") or _env("OPENROUTER_API_KEY")
 
     llm_raw = raw.get("llm", {})
 
     if env_api_key:
         provider = _env("LEXWIKI_PROVIDER") or _detect_provider_from_key(env_api_key)
         # Inject the key into the environment so llm/client.py can read it
-        key_env_var = f"LEXWIKI_RESOLVED_API_KEY"
+        key_env_var = "LEXWIKI_RESOLVED_API_KEY"
         os.environ[key_env_var] = env_api_key
         api_key_env = key_env_var
     else:
-        provider = llm_raw.get("provider", "anthropic")
-        api_key_env = llm_raw.get("api_key_env", "ANTHROPIC_API_KEY")
+        provider = llm_raw.get("provider", "openrouter")
+        api_key_env = llm_raw.get("api_key_env", "OPENROUTER_API_KEY")
 
+    provider = _env("LEXWIKI_PROVIDER") or provider
     llm = LLMConfig(
-        provider=_env("LEXWIKI_PROVIDER") or provider,
-        model=_env("LEXWIKI_MODEL") or llm_raw.get("model", "claude-sonnet-4-20250514"),
+        provider=provider,
+        model=_env("LEXWIKI_MODEL") or llm_raw.get("model") or _DEFAULT_MODELS.get(provider, ""),
         api_key_env=api_key_env,
         base_url=_env("LEXWIKI_BASE_URL") or llm_raw.get("base_url"),
         max_tokens=llm_raw.get("max_tokens", 4096),
@@ -166,21 +177,21 @@ wiki_dir: vault/wiki
 
 # LLM provider configuration
 llm:
-  provider: "anthropic"              # anthropic | openai | openrouter | ollama
-  model: "claude-sonnet-4-20250514"
-  api_key_env: "ANTHROPIC_API_KEY"   # env var name (not the key itself)
+  provider: "openrouter"             # openrouter | ollama | openai | anthropic
+  model: "deepseek/deepseek-v4.1-flash"
+  api_key_env: "OPENROUTER_API_KEY"  # env var name (not the key itself)
   base_url: null                     # override for custom endpoints
   max_tokens: 4096
   temperature: 0.2
 
-  # OpenRouter example:
-  # provider: "openrouter"
-  # model: "anthropic/claude-sonnet-4-20250514"
-  # api_key_env: "OPENROUTER_API_KEY"
+  # Other open-weights models on OpenRouter:
+  # model: "z-ai/glm-5.3-flash"
+  # model: "qwen/qwen3.8-flash"
+  # model: "moonshotai/kimi-k3"
 
-  # Ollama example:
+  # Fully local with Ollama:
   # provider: "ollama"
-  # model: "llama3"
+  # model: "qwen3.6"
   # base_url: "http://localhost:11434"
 
 # Default jurisdiction context

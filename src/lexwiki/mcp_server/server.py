@@ -1,12 +1,23 @@
-"""LexWiki MCP Server — exposes tools for IDE integration via FastMCP."""
+"""LexWiki MCP Server — exposes tools for IDE integration over stdio."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from mcp.server.fastmcp import FastMCP
+try:  # mcp >= 2.0 renamed FastMCP to MCPServer
+    from mcp.server.mcpserver import MCPServer
+    from mcp_types import ToolAnnotations
+except ImportError:  # mcp 1.x
+    from mcp.server.fastmcp import FastMCP as MCPServer
+    from mcp.types import ToolAnnotations
 
-mcp = FastMCP("lexwiki", instructions="LLM-powered legal knowledge base. Use these tools to ingest legal documents, compile a structured wiki, query it, and lint for consistency.")
+
+def _hints(read_only: bool, calls_llm: bool) -> ToolAnnotations:
+    # openWorldHint marks tools that send vault content to the configured LLM provider.
+    return ToolAnnotations(readOnlyHint=read_only, destructiveHint=False, openWorldHint=calls_llm)
+
+
+mcp = MCPServer("lexwiki", instructions="LLM-powered legal knowledge base. Use these tools to ingest legal documents, compile a structured wiki, query it, and lint for consistency.")
 
 
 def _cfg():
@@ -19,7 +30,7 @@ def _cfg():
     return cfg
 
 
-@mcp.tool()
+@mcp.tool(title="Ingest document", annotations=_hints(read_only=False, calls_llm=False))
 def lexwiki_ingest(source_path: str) -> str:
     """Ingest a legal document (PDF, DOCX, XLSX, PPTX, HTML, TXT) into the raw knowledge base.
 
@@ -50,7 +61,7 @@ def lexwiki_ingest(source_path: str) -> str:
         return f"Error: {e}"
 
 
-@mcp.tool()
+@mcp.tool(title="Compile wiki", annotations=_hints(read_only=False, calls_llm=True))
 def lexwiki_compile(file_path: str | None = None, full: bool = False) -> str:
     """Compile raw documents into the structured legal wiki.
 
@@ -75,7 +86,7 @@ def lexwiki_compile(file_path: str | None = None, full: bool = False) -> str:
         )
 
 
-@mcp.tool()
+@mcp.tool(title="Query wiki", annotations=_hints(read_only=True, calls_llm=True))
 def lexwiki_query(question: str, scope: str | None = None) -> str:
     """Query the legal knowledge base using natural language.
 
@@ -89,7 +100,7 @@ def lexwiki_query(question: str, scope: str | None = None) -> str:
     return engine.query(question, scope=scope)
 
 
-@mcp.tool()
+@mcp.tool(title="Lint wiki", annotations=_hints(read_only=True, calls_llm=True))
 def lexwiki_lint(file_path: str | None = None) -> str:
     """Check the legal wiki for consistency issues.
 
@@ -119,7 +130,7 @@ def lexwiki_lint(file_path: str | None = None) -> str:
     return "\n".join(lines)
 
 
-@mcp.tool()
+@mcp.tool(title="Read wiki page", annotations=_hints(read_only=True, calls_llm=False))
 def lexwiki_read_page(page_name: str) -> str:
     """Read a specific wiki page by name.
 
@@ -146,7 +157,7 @@ def lexwiki_read_page(page_name: str) -> str:
     return f"Page not found: {page_name}"
 
 
-@mcp.tool()
+@mcp.tool(title="List wiki pages", annotations=_hints(read_only=True, calls_llm=False))
 def lexwiki_list_pages(category: str | None = None) -> str:
     """List all pages in the wiki, optionally filtered by category.
 
@@ -175,7 +186,7 @@ def lexwiki_list_pages(category: str | None = None) -> str:
     return "\n".join(lines)
 
 
-@mcp.tool()
+@mcp.tool(title="Search wiki", annotations=_hints(read_only=True, calls_llm=False))
 def lexwiki_search(keywords: str, top_k: int = 10) -> str:
     """Fast keyword search across wiki pages (BM25 ranking, no LLM call needed).
 
